@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Dashboard | Multi-Doctor Appointment Conflict Scheduler</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Dynamic Navbar -->
+  <nav class="navbar"></nav>
+
+  <main class="dashboard-container">
+    <!-- Welcome Header -->
+    <div class="dashboard-header">
+      <div>
+        <h1 class="welcome-title" id="welcomeTitle">Welcome back, Patient!</h1>
+        <p class="welcome-subtitle">Manage your healthcare appointments and track real-time consultation status.</p>
+      </div>
+      <a href="book-appointment.html" class="btn btn-primary btn-lg">
+        <i class="fas fa-plus-circle"></i> Book an Appointment
+      </a>
+    </div>
+
+    <!-- Statistics Grid calculated via JS filter/reduce -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon-wrapper stat-icon-blue">
+          <i class="fas fa-calendar-day"></i>
+        </div>
+        <div>
+          <div class="stat-value" id="statUpcoming">0</div>
+          <div class="stat-label">Upcoming Visits</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon-wrapper stat-icon-amber">
+          <i class="fas fa-hourglass-half"></i>
+        </div>
+        <div>
+          <div class="stat-value" id="statPending">0</div>
+          <div class="stat-label">Pending Requests</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon-wrapper stat-icon-green">
+          <i class="fas fa-circle-check"></i>
+        </div>
+        <div>
+          <div class="stat-value" id="statCompleted">0</div>
+          <div class="stat-label">Completed Visits</div>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon-wrapper stat-icon-red">
+          <i class="fas fa-ban"></i>
+        </div>
+        <div>
+          <div class="stat-value" id="statCancelled">0</div>
+          <div class="stat-label">Cancelled / Rejected</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Appointments Table Card -->
+    <div class="table-card">
+      <div class="card-header-flex">
+        <h2 class="card-title">My Consultation History & Reviews</h2>
+        <a href="appointments.html" class="btn btn-secondary btn-sm">
+          View Full Directory <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date & Time</th>
+              <th>Doctor</th>
+              <th>Specialty</th>
+              <th>Room</th>
+              <th>Status</th>
+              <th>Actions / Review</th>
+            </tr>
+          </thead>
+          <tbody id="patientApptsTableBody">
+            <!-- Populated dynamically via DOM manipulation -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Review Modal -->
+  <div class="modal-overlay" id="reviewModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">How was your experience?</h3>
+        <button class="modal-close" id="closeReviewModal">&times;</button>
+      </div>
+
+      <form id="reviewForm">
+        <input type="hidden" id="reviewAppointmentId">
+        <input type="hidden" id="reviewDoctorId">
+
+        <div style="text-align: center; margin-bottom: 1.5rem;">
+          <p style="color: var(--text-muted); margin-bottom: 0.5rem;" id="reviewDoctorName">Rate your consultation</p>
+          <div class="star-rating" id="starRatingPicker">
+            <span class="star selected" data-rating="1">★</span>
+            <span class="star selected" data-rating="2">★</span>
+            <span class="star selected" data-rating="3">★</span>
+            <span class="star selected" data-rating="4">★</span>
+            <span class="star selected" data-rating="5">★</span>
+          </div>
+          <input type="hidden" id="ratingScore" value="5">
+        </div>
+
+        <div class="form-group">
+          <label for="reviewComment" class="form-label">Tell us about your consultation experience *</label>
+          <textarea id="reviewComment" class="form-control" rows="4" placeholder="Share details about the doctor's diagnosis, clarity, and professionalism..." required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-teal btn-block btn-lg">
+          <i class="fas fa-paper-plane"></i> Submit Verified Review
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="js/data.js"></script>
+  <script src="js/scheduler.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const user = AuthModule.enforceGuard('patient');
+      if (!user) return;
+
+      document.getElementById('welcomeTitle').textContent = `Welcome back, ${user.name}!`;
+
+      renderPatientDashboard(user);
+    });
+
+    function renderPatientDashboard(user) {
+      const allAppts = DataStore.getAppointments();
+
+      // Filter appointments belonging strictly to this patient
+      const myAppts = allAppts.filter(a => Number(a.patientId) === Number(user.id) || a.patientEmail === user.email);
+
+      const upcomingCount = myAppts.filter(a => a.status === 'Approved').length;
+      const pendingCount = myAppts.filter(a => a.status === 'Pending').length;
+      const completedCount = myAppts.filter(a => a.status === 'Completed').length;
+      const cancelledCount = myAppts.filter(a => a.status === 'Cancelled' || a.status === 'Rejected').length;
+
+      document.getElementById('statUpcoming').textContent = upcomingCount;
+      document.getElementById('statPending').textContent = pendingCount;
+      document.getElementById('statCompleted').textContent = completedCount;
+      document.getElementById('statCancelled').textContent = cancelledCount;
+
+      const tbody = document.getElementById('patientApptsTableBody');
+
+      if (myAppts.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6">
+              <div class="empty-state">
+                <i class="fas fa-calendar-xmark empty-icon"></i>
+                <p>No appointment records found. Book your first consultation today!</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      myAppts.sort((a, b) => new Date(b.date + 'T' + b.startTime) - new Date(a.date + 'T' + a.startTime));
+
+      const reviews = DataStore.getReviews();
+
+      tbody.innerHTML = myAppts.map(appt => {
+        const formattedTime = `${SchedulerEngine.format12Hour(appt.startTime)} - ${SchedulerEngine.format12Hour(appt.endTime)}`;
+        const hasReviewed = reviews.some(r => Number(r.appointmentId) === Number(appt.id));
+        const timePassed = SchedulerEngine.isAppointmentTimePassed(appt.date, appt.startTime);
+
+        let statusBadge = `<span class="status-badge ${appt.status}">${appt.status}</span>`;
+        let actionBtn = '';
+
+        if (appt.status === 'Approved') {
+          if (timePassed) {
+            statusBadge = `<span class="status-badge Pending"><i class="fas fa-hourglass-half"></i> Awaiting Doctor Confirmation</span>`;
+          } else {
+            statusBadge = `<span class="status-badge Approved"><i class="fas fa-calendar-check"></i> Approved (Upcoming)</span>`;
+          }
+          actionBtn = `
+            <button class="btn btn-danger btn-sm" onclick="cancelAppointment(${appt.id})">
+              <i class="fas fa-times"></i> Cancel
+            </button>
+          `;
+        } else if (appt.status === 'Pending') {
+          statusBadge = `<span class="status-badge Pending"><i class="fas fa-clock"></i> Waiting Doctor Approval</span>`;
+          actionBtn = `
+            <button class="btn btn-danger btn-sm" onclick="cancelAppointment(${appt.id})">
+              <i class="fas fa-times"></i> Cancel
+            </button>
+          `;
+        } else if (appt.status === 'Completed') {
+          statusBadge = `<span class="status-badge Completed"><i class="fas fa-circle-check"></i> Completed</span>`;
+
+          // Anti-Cheat Check: Only allow review if completed AND not reviewed yet
+          if (hasReviewed) {
+            actionBtn = `<span style="color: var(--teal); font-weight: 700; font-size: 0.85rem;"><i class="fas fa-check-circle"></i> Review Submitted</span>`;
+          } else {
+            actionBtn = `
+              <button class="btn btn-teal btn-sm" onclick="openReviewModal(${appt.id}, ${appt.doctorId}, '${appt.doctorName.replace(/'/g, "\\'")}')">
+                <i class="fas fa-star"></i> Rate Your Experience
+              </button>
+            `;
+          }
+        } else if (appt.status === 'Rejected') {
+          statusBadge = `<span class="status-badge Rejected">Rejected</span>`;
+          actionBtn = `<small style="color: var(--text-muted);" title="${appt.rejectionReason || ''}">${appt.rejectionReason || 'Doctor Unavailable'}</small>`;
+        }
+
+        return `
+          <tr>
+            <td>
+              <strong>${appt.date}</strong>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">${formattedTime}</div>
+            </td>
+            <td><strong>${appt.doctorName}</strong></td>
+            <td>${appt.specialty}</td>
+            <td><span style="font-size: 0.85rem; background: var(--bg-card-subtle); padding: 0.2rem 0.6rem; border-radius: 4px;">${appt.roomNumber}</span></td>
+            <td>${statusBadge}</td>
+            <td>${actionBtn}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function cancelAppointment(id) {
+      if (confirm('Are you sure you want to cancel this appointment?')) {
+        DataStore.updateAppointmentStatus(id, 'Cancelled');
+        AppController.showToast('Appointment cancelled.', 'info');
+        const user = DataStore.getLoggedInUser();
+        renderPatientDashboard(user);
+      }
+    }
+
+    const reviewModal = document.getElementById('reviewModal');
+    const closeReviewModal = document.getElementById('closeReviewModal');
+    const reviewForm = document.getElementById('reviewForm');
+    const starPicker = document.getElementById('starRatingPicker');
+
+    function openReviewModal(apptId, docId, docName) {
+      const user = DataStore.getLoggedInUser();
+      const allAppts = DataStore.getAppointments();
+      const appt = allAppts.find(a => Number(a.id) === Number(apptId));
+
+      // Anti-Cheat Authorization Check
+      if (!appt || Number(appt.patientId) !== Number(user.id) || appt.status !== 'Completed') {
+        AppController.showToast('You can only review consultations marked as Completed by the doctor.', 'error');
+        return;
+      }
+
+      const reviews = DataStore.getReviews();
+      if (reviews.some(r => Number(r.appointmentId) === Number(apptId))) {
+        AppController.showToast('You have already submitted feedback for this appointment.', 'warning');
+        return;
+      }
+
+      document.getElementById('reviewAppointmentId').value = apptId;
+      document.getElementById('reviewDoctorId').value = docId;
+      document.getElementById('reviewDoctorName').textContent = `Rate experience with ${docName}`;
+      reviewModal.classList.add('show');
+    }
+
+    if (closeReviewModal) {
+      closeReviewModal.addEventListener('click', () => reviewModal.classList.remove('show'));
+    }
+
+    if (starPicker) {
+      const stars = starPicker.querySelectorAll('.star');
+      stars.forEach(star => {
+        star.addEventListener('click', (e) => {
+          const score = e.target.getAttribute('data-rating');
+          document.getElementById('ratingScore').value = score;
+          stars.forEach(s => {
+            if (Number(s.getAttribute('data-rating')) <= Number(score)) {
+              s.classList.add('selected');
+            } else {
+              s.classList.remove('selected');
+            }
+          });
+        });
+      });
+    }
+
+    if (reviewForm) {
+      reviewForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const user = DataStore.getLoggedInUser();
+        const appointmentId = Number(document.getElementById('reviewAppointmentId').value);
+        const doctorId = Number(document.getElementById('reviewDoctorId').value);
+        const rating = Number(document.getElementById('ratingScore').value);
+        const comment = document.getElementById('reviewComment').value.trim();
+
+        // Verification checks
+        const allAppts = DataStore.getAppointments();
+        const appt = allAppts.find(a => Number(a.id) === Number(appointmentId));
+
+        if (!appt || Number(appt.patientId) !== Number(user.id) || appt.status !== 'Completed') {
+          AppController.showToast('Unauthorized review submission.', 'error');
+          return;
+        }
+
+        const reviews = DataStore.getReviews();
+        if (reviews.some(r => Number(r.appointmentId) === Number(appointmentId))) {
+          AppController.showToast('Review already submitted for this consultation.', 'warning');
+          reviewModal.classList.remove('show');
+          return;
+        }
+
+        const doctor = DataStore.getDoctorById(doctorId);
+
+        DataStore.saveReview({
+          id: Date.now(),
+          appointmentId,
+          patientId: user.id,
+          patientName: user.name,
+          doctorId,
+          doctorName: doctor ? doctor.name : 'Doctor',
+          rating,
+          comment,
+          createdAt: new Date().toISOString().split('T')[0]
+        });
+
+        reviewModal.classList.remove('show');
+        AppController.showToast('Thank you! Your experience review has been saved.', 'success');
+        renderPatientDashboard(user);
+      });
+    }
+  </script>
+</body>
+</html>
