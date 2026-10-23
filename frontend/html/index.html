@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Scheduling. Better Healthcare | Multi-Doctor Appointment Conflict Scheduler</title>
+  <meta name="description" content="A smart healthcare appointment scheduling platform preventing doctor and consultation room double-bookings across 10 predefined clinic specialists.">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Dynamic Navbar -->
+  <nav class="navbar"></nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-container">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <i class="fas fa-shield-halved"></i> Zero Conflict Booking Engine
+        </div>
+        <h1 class="hero-title">
+          Smart Scheduling.<br>
+          <span>Better Healthcare.</span>
+        </h1>
+        <p class="hero-subtitle">
+          Our intelligent platform connects patients with 10 leading medical specialists while eliminating double-booking conflicts across doctors and consultation rooms.
+        </p>
+        <div class="hero-cta-group">
+          <a href="book-appointment.html" class="btn btn-primary btn-lg">
+            <i class="fas fa-calendar-check"></i> Book an Appointment
+          </a>
+          <a href="login.html" class="btn btn-outline btn-lg">
+            <i class="fas fa-right-to-bracket"></i> Login
+          </a>
+          <a href="signup.html" class="btn btn-teal btn-lg">
+            <i class="fas fa-user-plus"></i> Sign Up
+          </a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item">
+            <h3>10</h3>
+            <p>Predefined Specialists</p>
+          </div>
+          <div class="stat-item">
+            <h3>100%</h3>
+            <p>Conflict Free</p>
+          </div>
+          <div class="stat-item">
+            <h3>7-Day</h3>
+            <p>Auto Slot Search</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="hero-card-preview">
+          <div class="preview-header">
+            <div>
+              <h4 style="font-weight: 800; font-size: 1.1rem;">Appointment Verification</h4>
+              <p style="font-size: 0.8rem; color: var(--text-muted);">Cardiology Suite • Room 101</p>
+            </div>
+            <span class="preview-chip">
+              <i class="fas fa-check-circle"></i> Live Check
+            </span>
+          </div>
+
+          <div style="background: var(--bg-card-subtle); padding: 1rem; border-radius: var(--radius-md); font-size: 0.9rem;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
+              <span><strong>Doctor:</strong> Dr. Ananya Sharma</span>
+              <span style="color: var(--teal); font-weight: 700;">Available ✓</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 0.4rem;">
+              <span><strong>Room:</strong> Room 101</span>
+              <span style="color: var(--teal); font-weight: 700;">Available ✓</span>
+            </div>
+            <div style="display: flex; justify-content: space-between;">
+              <span><strong>Slot:</strong> 10:30 AM - 11:00 AM</span>
+              <span class="status-badge Approved">Approved</span>
+            </div>
+          </div>
+
+          <div class="preview-conflict-callout">
+            <i class="fas fa-triangle-exclamation"></i>
+            <strong>Conflict Prevented:</strong> Detected overlapping booking attempt at 10:15 AM. System automatically safeguarded room capacity.
+          </div>
+
+          <div class="preview-suggested-callout">
+            <i class="fas fa-wand-magic-sparkles"></i>
+            <strong>Suggested Slot Found:</strong> Automatically recommended 10:30 AM slot on same day.
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About Section -->
+  <section class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">About The Platform</span>
+        <h2 class="section-title">What is our platform?</h2>
+        <p class="section-description">
+          Multi-Doctor Appointment Conflict Scheduler is a smart clinic appointment management platform that helps patients book appointments with doctors while preventing double-booking of doctors and consultation rooms.
+        </p>
+      </div>
+
+      <div class="grid-2" style="align-items: center;">
+        <div>
+          <div class="card" style="margin-bottom: 1rem;">
+            <h3 style="color: var(--primary); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+              <i class="fas fa-user-doctor"></i> Doctor Availability Safeguard
+            </h3>
+            <p style="color: var(--text-muted);">
+              Verifies individual physician working hours and existing appointments across our 10 predefined clinic doctors to guarantee zero double-bookings.
+            </p>
+          </div>
+          <div class="card" style="margin-bottom: 1rem;">
+            <h3 style="color: var(--teal); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+              <i class="fas fa-door-open"></i> Consultation Room Conflict Checks
+            </h3>
+            <p style="color: var(--text-muted);">
+              Calculates room occupancies across medical specialties, ensuring diagnostic suites and examination rooms are never double-booked.
+            </p>
+          </div>
+          <div class="card">
+            <h3 style="color: var(--accent); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+              <i class="fas fa-bolt"></i> Earliest Next Available Slot Finder
+            </h3>
+            <p style="color: var(--text-muted);">
+              If a requested slot is occupied, our algorithm scans up to 7 days forward to automatically present the earliest available slot for both doctor and room.
+            </p>
+          </div>
+        </div>
+
+        <div class="card" style="background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 2.5rem;">
+          <h3 style="font-size: 1.6rem; margin-bottom: 1rem; color: white;">Key System Highlights</h3>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 1rem; font-size: 0.95rem;">
+            <li style="display: flex; align-items: center; gap: 0.8rem;">
+              <i class="fas fa-check-circle" style="color: #34d399; font-size: 1.2rem;"></i> Checks doctor availability in real-time.
+            </li>
+            <li style="display: flex; align-items: center; gap: 0.8rem;">
+              <i class="fas fa-check-circle" style="color: #34d399; font-size: 1.2rem;"></i> Checks consultation room availability.
+            </li>
+            <li style="display: flex; align-items: center; gap: 0.8rem;">
+              <i class="fas fa-check-circle" style="color: #34d399; font-size: 1.2rem;"></i> Prevents overlapping time intervals.
+            </li>
+            <li style="display: flex; align-items: center; gap: 0.8rem;">
+              <i class="fas fa-check-circle" style="color: #34d399; font-size: 1.2rem;"></i> Suggests next available appointment slots.
+            </li>
+            <li style="display: flex; align-items: center; gap: 0.8rem;">
+              <i class="fas fa-check-circle" style="color: #34d399; font-size: 1.2rem;"></i> Predefined list of 10 registered clinic doctors.
+            </li>
+            <li style="display: flex; align-items: center; gap: 0.8rem;">
+              <i class="fas fa-check-circle" style="color: #34d399; font-size: 1.2rem;"></i> Patients track live status & submit reviews.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Step-By-Step Workflow</span>
+        <h2 class="section-title">How It Works</h2>
+        <p class="section-description">A seamless 4-step process designed for patients and medical staff.</p>
+      </div>
+
+      <div class="grid-4">
+        <div class="card step-card">
+          <div class="step-num">01</div>
+          <h3 class="feature-title">Choose Your Doctor</h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">
+            Select from our 10 predefined clinic doctors across Cardiology, Neurology, Dermatology, Orthopedics, Pediatrics, or General Medicine.
+          </p>
+        </div>
+        <div class="card step-card">
+          <div class="step-num">02</div>
+          <h3 class="feature-title">Select Appointment</h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">
+            Pick your preferred date, start time, visit duration, and available consultation room.
+          </p>
+        </div>
+        <div class="card step-card">
+          <div class="step-num">03</div>
+          <h3 class="feature-title">Smart Conflict Detection</h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">
+            The interval algorithm checks doctor & room schedules simultaneously to ensure zero collisions.
+          </p>
+        </div>
+        <div class="card step-card">
+          <div class="step-num">04</div>
+          <h3 class="feature-title">Get Confirmation</h3>
+          <p style="color: var(--text-muted); font-size: 0.9rem;">
+            Doctor reviews and approves your request. Track live status updates and leave post-visit feedback.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="section section-alt">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Core Features</span>
+        <h2 class="section-title">Built for Modern Healthcare</h2>
+        <p class="section-description">Everything you need for seamless clinic operations and patient experience.</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="feature-icon"><i class="fas fa-clock"></i></div>
+          <h3 class="feature-title">Smart Scheduling</h3>
+          <p style="color: var(--text-muted);">
+            Find suitable appointment slots instantly based on real-time doctor availability calendars.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="feature-icon"><i class="fas fa-ban"></i></div>
+          <h3 class="feature-title">Conflict Prevention</h3>
+          <p style="color: var(--text-muted);">
+            Mathematical interval validation eliminates overlapping doctor and room bookings automatically.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="feature-icon"><i class="fas fa-user-check"></i></div>
+          <h3 class="feature-title">Doctor Approval</h3>
+          <p style="color: var(--text-muted);">
+            Doctors can conveniently approve or reject incoming patient requests from their dashboard.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="feature-icon"><i class="fas fa-history"></i></div>
+          <h3 class="feature-title">Appointment History</h3>
+          <p style="color: var(--text-muted);">
+            Patients and doctors can access structured history logs of all upcoming, completed, and past visits.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="feature-icon"><i class="fas fa-star"></i></div>
+          <h3 class="feature-title">Experience & Reviews</h3>
+          <p style="color: var(--text-muted);">
+            Patients can rate consultation experiences 1 to 5 stars and share valuable written feedback.
+          </p>
+        </div>
+
+        <div class="card">
+          <div class="feature-icon"><i class="fas fa-magnifying-glass-chart"></i></div>
+          <h3 class="feature-title">Next Available Slot</h3>
+          <p style="color: var(--text-muted);">
+            Linear search algorithm scans up to 7 consecutive days to suggest the earliest conflict-free slot.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Predefined Medical Team Section (Displays all 10 Doctors) -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">Predefined Specialists</span>
+        <h2 class="section-title">Our Medical Team (10 Clinic Doctors)</h2>
+        <p class="section-description">Predefined medical specialists available for consultation appointments.</p>
+      </div>
+
+      <div class="grid-3" id="homeDoctorsGrid">
+        <!-- Rendered dynamically by JavaScript (Exactly 10 Doctors) -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div>
+        <div class="footer-brand">
+          <i class="fas fa-hospital-user"></i> MediScheduler
+        </div>
+        <p style="font-size: 0.9rem; line-height: 1.6; margin-bottom: 1rem;">
+          Multi-Doctor Appointment Conflict Scheduler is an advanced clinic management prototype preventing doctor and room scheduling collisions across 10 predefined doctors.
+        </p>
+      </div>
+
+      <div>
+        <h4 class="footer-title">Quick Links</h4>
+        <ul class="footer-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="book-appointment.html">Book Appointment</a></li>
+          <li><a href="reviews.html">Doctor Reviews</a></li>
+          <li><a href="login.html">Login</a></li>
+          <li><a href="signup.html">Sign Up</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="footer-title">Specialties</h4>
+        <ul class="footer-links">
+          <li><a href="book-appointment.html">Cardiology</a></li>
+          <li><a href="book-appointment.html">Neurology</a></li>
+          <li><a href="book-appointment.html">Dermatology</a></li>
+          <li><a href="book-appointment.html">Orthopedics</a></li>
+          <li><a href="book-appointment.html">Pediatrics</a></li>
+          <li><a href="book-appointment.html">General Medicine</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="footer-title">Contact Us</h4>
+        <div style="font-size: 0.9rem; display: flex; flex-direction: column; gap: 0.6rem;">
+          <p><i class="fas fa-envelope" style="color: var(--primary);"></i> support@clinic.com</p>
+          <p><i class="fas fa-phone" style="color: var(--primary);"></i> +91 98765 43210</p>
+          <p><i class="fas fa-location-dot" style="color: var(--primary);"></i> Clinic Management Center, Healthcare Avenue</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2026 Multi-Doctor Appointment Conflict Scheduler. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/scheduler.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const homeDoctorsGrid = document.getElementById('homeDoctorsGrid');
+      if (homeDoctorsGrid) {
+        try {
+          const [doctorsRes, reviewsRes] = await Promise.all([
+            API.doctors.getAll(),
+            API.reviews.getAll()
+          ]);
+          const doctors = doctorsRes.data || [];
+          const reviews = reviewsRes.data || [];
+
+          homeDoctorsGrid.innerHTML = doctors.map(doc => {
+            const docReviews = reviews.filter(r => (r.doctorId?._id || r.doctorId) == (doc._id || doc.id));
+            const avgRating = docReviews.length > 0 
+              ? (docReviews.reduce((sum, r) => sum + r.rating, 0) / docReviews.length).toFixed(1)
+              : '5.0';
+
+            const roomText = doc.assignedRoom ? ` • Room ${doc.assignedRoom.roomNumber || doc.assignedRoom}` : '';
+
+            return `
+              <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                    <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem;">
+                      ${doc.name.replace('Dr. ', '').charAt(0)}
+                    </div>
+                    <span style="background: #fef3c7; color: #92400e; font-weight: 700; font-size: 0.8rem; padding: 0.2rem 0.6rem; border-radius: 20px;">
+                      ⭐ ${avgRating} (${docReviews.length} reviews)
+                    </span>
+                  </div>
+                  <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.3rem;">${doc.name}</h3>
+                  <p style="color: var(--primary); font-weight: 600; font-size: 0.85rem; margin-bottom: 0.4rem;">
+                    <i class="fas fa-stethoscope"></i> ${doc.specialty} • ${doc.experience} Years Exp.
+                  </p>
+                  <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.8rem;">
+                    <i class="fas fa-clock"></i> ${SchedulerEngine.format12Hour(doc.startTime)} - ${SchedulerEngine.format12Hour(doc.endTime)}${roomText}
+                  </p>
+                  <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; margin-bottom: 1rem;">
+                    ${doc.bio || ''}
+                  </p>
+                </div>
+                <a href="book-appointment.html?doctorId=${doc._id || doc.id}" class="btn btn-outline btn-sm btn-block">
+                  Book Consultation
+                </a>
+              </div>
+            `;
+          }).join('');
+        } catch (err) {
+          console.error('Failed to load home doctors:', err);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
