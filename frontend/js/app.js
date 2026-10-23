@@ -1,6 +1,6 @@
 /* ==========================================================================
-   Multi-Doctor Appointment Conflict Scheduler - Global App Controller
-   Navbar Injection, Toast System, Modal Helpers & Global DOM Logic
+   Multi-Doctor Appointment Conflict Scheduler - Phase 2 Global App Controller
+   Navbar Injection, Session Synchronization, Toast System, Modal Helpers
    ========================================================================== */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -11,11 +11,39 @@ const AppController = {
   /**
    * Renders and manages the dynamic header navbar
    */
-  initNavbar() {
+  async initNavbar() {
     const navContainer = document.querySelector('.navbar');
     if (!navContainer) return;
 
-    const loggedInUser = DataStore.getLoggedInUser();
+    let loggedInUser = null;
+    try {
+      const stored = sessionStorage.getItem('currentUser');
+      if (stored) loggedInUser = JSON.parse(stored);
+    } catch (e) {}
+
+    // Verify session in background if available
+    if (loggedInUser) {
+      API.auth.getMe().then(res => {
+        if (!res || !res.user) {
+          sessionStorage.removeItem('currentUser');
+          sessionStorage.removeItem('authToken');
+          AppController.renderNavbar(null);
+        }
+      }).catch(() => {
+        // Token invalid or expired
+        sessionStorage.removeItem('currentUser');
+        sessionStorage.removeItem('authToken');
+        AppController.renderNavbar(null);
+      });
+    }
+
+    AppController.renderNavbar(loggedInUser);
+  },
+
+  renderNavbar(loggedInUser) {
+    const navContainer = document.querySelector('.navbar');
+    if (!navContainer) return;
+
     const currentPage = window.location.pathname.split('/').pop() || 'index.html';
 
     let navLinksHtml = '';
@@ -23,6 +51,7 @@ const AppController = {
 
     if (loggedInUser) {
       const isDoctor = loggedInUser.role === 'doctor';
+      const isAdmin = loggedInUser.role === 'admin';
       const dashboardLink = isDoctor ? 'doctor-dashboard.html' : 'patient-dashboard.html';
 
       navLinksHtml = `

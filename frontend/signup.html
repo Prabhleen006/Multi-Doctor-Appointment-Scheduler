@@ -77,6 +77,7 @@
     </div>
   </div>
 
+  <script src="js/api.js"></script>
   <script src="js/data.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/app.js"></script>
@@ -86,9 +87,13 @@
       const signupAlert = document.getElementById('signupAlert');
       const alertMessage = document.getElementById('alertMessage');
 
-      signupForm.addEventListener('submit', (e) => {
+      signupForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         signupAlert.classList.remove('show');
+
+        const submitBtn = signupForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
 
         const name = document.getElementById('signupName').value.trim();
         const email = document.getElementById('signupEmail').value.trim();
@@ -96,22 +101,31 @@
         const password = document.getElementById('signupPassword').value;
         const confirmPassword = document.getElementById('signupConfirmPassword').value;
 
-        const result = AuthModule.register({
-          name,
-          email,
-          phone,
-          password,
-          confirmPassword
-        });
+        try {
+          const result = await AuthModule.register({
+            name,
+            email,
+            phone,
+            password,
+            confirmPassword
+          });
 
-        if (result.success) {
-          AppController.showToast(result.message, 'success');
-          setTimeout(() => {
-            window.location.href = 'login.html';
-          }, 1200);
-        } else {
-          alertMessage.textContent = result.message;
+          if (result.success) {
+            AppController.showToast(result.message || 'Account created successfully! Redirecting to login...', 'success');
+            setTimeout(() => {
+              window.location.href = 'login.html?registered=true';
+            }, 1000);
+          } else {
+            alertMessage.textContent = result.message;
+            signupAlert.classList.add('show');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-user-check"></i> Create Patient Account';
+          }
+        } catch (err) {
+          alertMessage.textContent = err.message || 'Registration failed. Server error.';
           signupAlert.classList.add('show');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-user-check"></i> Create Patient Account';
         }
       });
     });
