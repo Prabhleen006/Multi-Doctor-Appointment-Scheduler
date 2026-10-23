@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | Multi-Doctor Appointment Conflict Scheduler</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Dynamic Navbar -->
+  <nav class="navbar"></nav>
+
+  <div class="auth-wrapper">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="brand-icon" style="margin: 0 auto 1rem;">
+          <i class="fas fa-user-lock"></i>
+        </div>
+        <h1 class="auth-title">Clinic Login Portal</h1>
+        <p class="auth-subtitle">Sign in to access your appointment dashboard</p>
+      </div>
+
+      <div class="alert-box alert-success" id="loginSuccessAlert" style="display: none; margin-bottom: 1.25rem;">
+        <i class="fas fa-circle-check"></i> <span id="successMessage">Account registered successfully! Please enter your credentials to log in.</span>
+      </div>
+
+      <div class="alert-box alert-error" id="loginAlert">
+        <i class="fas fa-exclamation-circle"></i> <span id="alertMessage"></span>
+      </div>
+
+      <form id="loginForm">
+        <!-- Role Selection -->
+        <div class="form-group">
+          <label class="form-label">Login As</label>
+          <div class="role-selector">
+            <div class="role-option">
+              <input type="radio" name="role" id="rolePatient" value="patient" checked>
+              <label for="rolePatient" class="role-label">
+                <i class="fas fa-user-injured"></i> Patient
+              </label>
+            </div>
+            <div class="role-option">
+              <input type="radio" name="role" id="roleDoctor" value="doctor">
+              <label for="roleDoctor" class="role-label">
+                <i class="fas fa-user-md"></i> Doctor
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="loginEmail" class="form-label">Email Address</label>
+          <input type="email" id="loginEmail" class="form-control" placeholder="e.g. sneha@example.com or ananya@clinic.com" required>
+        </div>
+
+        <div class="form-group">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+            <label for="loginPassword" class="form-label" style="margin-bottom: 0;">Password</label>
+            <a href="forgot-password.html" style="font-size: 0.85rem; font-weight: 600;">Forgot Password?</a>
+          </div>
+          <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 1rem;">
+          <i class="fas fa-right-to-bracket"></i> Login
+        </button>
+      </form>
+
+      <!-- Predefined Credentials Helper Box -->
+      <div style="margin-top: 1.8rem; padding: 1rem; background: var(--bg-card-subtle); border-radius: var(--radius-md); font-size: 0.82rem; color: var(--text-muted);">
+        <strong style="color: var(--text-main); display: block; margin-bottom: 0.4rem;">
+          <i class="fas fa-key" style="color: var(--primary);"></i> Predefined Clinic Demo Credentials:
+        </strong>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem;">
+          <span><strong>Patient:</strong> sneha@example.com</span>
+          <span><code>123456</code></span>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.3rem;">
+          <span><strong>Doctor 1 (Cardiology):</strong> ananya@clinic.com</span>
+          <span><code>doctor123</code></span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span><strong>Doctor 2 (Dermatology):</strong> rahul@clinic.com</span>
+          <span><code>doctor123</code></span>
+        </div>
+      </div>
+
+      <div class="auth-footer">
+        Don't have a patient account? <a href="signup.html" style="font-weight: 700;">Sign Up As Patient</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const loginForm = document.getElementById('loginForm');
+      const loginAlert = document.getElementById('loginAlert');
+      const alertMessage = document.getElementById('alertMessage');
+      const loginSuccessAlert = document.getElementById('loginSuccessAlert');
+
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('registered') === 'true' && loginSuccessAlert) {
+        loginSuccessAlert.style.display = 'flex';
+        loginSuccessAlert.classList.add('show');
+      }
+
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        loginAlert.classList.remove('show');
+
+        const submitBtn = loginForm.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
+
+        const email = document.getElementById('loginEmail').value.trim();
+        const password = document.getElementById('loginPassword').value;
+        const selectedRole = document.querySelector('input[name="role"]:checked').value;
+
+        try {
+          const result = await AuthModule.login(email, password, selectedRole);
+
+          if (result.success) {
+            AppController.showToast(result.message, 'success');
+            setTimeout(() => {
+              window.location.href = result.redirectUrl;
+            }, 800);
+          } else {
+            alertMessage.textContent = result.message;
+            loginAlert.classList.add('show');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-right-to-bracket"></i> Login';
+          }
+        } catch (err) {
+          alertMessage.textContent = err.message || 'Connection to authentication server failed.';
+          loginAlert.classList.add('show');
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = '<i class="fas fa-right-to-bracket"></i> Login';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
