@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Profile | Multi-Doctor Appointment Conflict Scheduler</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Dynamic Navbar -->
+  <nav class="navbar"></nav>
+
+  <main class="dashboard-container">
+    <div class="grid-2" style="grid-template-columns: 0.7fr 1.3fr;">
+      <!-- Profile Card -->
+      <div class="card" style="text-align: center; padding: 2.5rem 1.5rem;">
+        <div id="profileAvatar" style="width: 90px; height: 90px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--teal)); color: white; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 800; margin: 0 auto 1.25rem; box-shadow: var(--shadow-md);">
+          U
+        </div>
+
+        <h2 id="profileName" style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.2rem;">User Name</h2>
+        <span class="status-badge Approved" id="profileRoleBadge" style="margin-bottom: 1.5rem; text-transform: capitalize;">
+          Role
+        </span>
+
+        <div style="text-align: left; background: var(--bg-card-subtle); padding: 1.2rem; border-radius: var(--radius-md); font-size: 0.9rem; display: flex; flex-direction: column; gap: 0.8rem; margin-top: 1rem;">
+          <div style="display: flex; align-items: center; gap: 0.8rem;">
+            <i class="fas fa-envelope" style="color: var(--primary); width: 20px;"></i>
+            <span id="profileEmail">user@example.com</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.8rem;">
+            <i class="fas fa-phone" style="color: var(--primary); width: 20px;"></i>
+            <span id="profilePhone">+91 9876543210</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.8rem;" id="profileSpecialtyRow">
+            <i class="fas fa-stethoscope" style="color: var(--teal); width: 20px;"></i>
+            <span id="profileSpecialty">Cardiology</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.8rem;" id="profileHoursRow">
+            <i class="fas fa-clock" style="color: var(--teal); width: 20px;"></i>
+            <span id="profileHours">09:00 AM - 05:00 PM</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overview Stats & History -->
+      <div>
+        <div class="card" style="margin-bottom: 2rem;">
+          <h3 class="card-title" style="margin-bottom: 1.25rem;">
+            <i class="fas fa-chart-line" style="color: var(--primary);"></i> Activity Breakdown
+          </h3>
+          <div class="grid-3" id="profileStatsGrid">
+            <!-- Populated dynamically via JS -->
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="card-header-flex">
+            <h3 class="card-title"><i class="fas fa-history"></i> Account Activity Log</h3>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Title / Doctor</th>
+                  <th>Room</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="profileActivityTbody">
+                <!-- Populated dynamically -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/data.js"></script>
+  <script src="../js/scheduler.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = AuthModule.enforceGuard();
+      if (!user) return;
+
+      document.getElementById('profileAvatar').textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+      document.getElementById('profileName').textContent = user.name || 'User';
+      document.getElementById('profileRoleBadge').textContent = (user.role || '').toUpperCase();
+      document.getElementById('profileEmail').textContent = user.email || '';
+      document.getElementById('profilePhone').textContent = user.phone || 'Not provided';
+
+      const isDoctor = user.role === 'doctor';
+      const specialtyRow = document.getElementById('profileSpecialtyRow');
+      const hoursRow = document.getElementById('profileHoursRow');
+
+      try {
+        const [apptsRes, reviewsRes] = await Promise.all([
+          API.appointments.getMy(),
+          API.reviews.getAll()
+        ]);
+        const allAppts = apptsRes.data || [];
+        const allReviews = reviewsRes.data || [];
+
+        if (isDoctor) {
+          const docRes = await API.doctors.getAll();
+          const doctors = docRes.data || [];
+          const doc = doctors.find(d => (d.email && d.email.toLowerCase() === user.email.toLowerCase()) || (d.userId && d.userId._id === user._id)) || {
+            specialty: 'General Medicine',
+            startTime: '09:00',
+            endTime: '17:00'
+          };
+
+          specialtyRow.style.display = 'flex';
+          hoursRow.style.display = 'flex';
+          document.getElementById('profileSpecialty').textContent = doc.specialty;
+          document.getElementById('profileHours').textContent = `${SchedulerEngine.format12Hour(doc.startTime || '09:00')} - ${SchedulerEngine.format12Hour(doc.endTime || '17:00')}`;
+
+          const docReviews = allReviews.filter(r => (r.doctorId?._id || r.doctorId) == (doc._id || doc.id));
+          const avgRating = docReviews.length > 0 
+            ? (docReviews.reduce((sum, r) => sum + r.rating, 0) / docReviews.length).toFixed(1)
+            : '5.0';
+
+          document.getElementById('profileStatsGrid').innerHTML = `
+            <div style="background: var(--bg-card-subtle); padding: 1rem; border-radius: var(--radius-md); text-align: center;">
+              <div style="font-size: 1.6rem; font-weight: 800; color: var(--primary);">${allAppts.length}</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Total Consultations</div>
+            </div>
+            <div style="background: var(--bg-card-subtle); padding: 1rem; border-radius: var(--radius-md); text-align: center;">
+              <div style="font-size: 1.6rem; font-weight: 800; color: var(--teal);">${allAppts.filter(a => a.status === 'Completed').length}</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Completed Visits</div>
+            </div>
+            <div style="background: var(--bg-card-subtle); padding: 1rem; border-radius: var(--radius-md); text-align: center;">
+              <div style="font-size: 1.6rem; font-weight: 800; color: #f59e0b;">⭐ ${avgRating}</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Avg Rating (${docReviews.length})</div>
+            </div>
+          `;
+
+          renderActivityTable(allAppts);
+        } else {
+          specialtyRow.style.display = 'none';
+          hoursRow.style.display = 'none';
+
+          const patientReviews = allReviews.filter(r => (r.patientId?._id || r.patientId) == (user._id || user.id));
+
+          document.getElementById('profileStatsGrid').innerHTML = `
+            <div style="background: var(--bg-card-subtle); padding: 1rem; border-radius: var(--radius-md); text-align: center;">
+              <div style="font-size: 1.6rem; font-weight: 800; color: var(--primary);">${allAppts.length}</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Total Appointments</div>
+            </div>
+            <div style="background: var(--bg-card-subtle); padding: 1rem; border-radius: var(--radius-md); text-align: center;">
+              <div style="font-size: 1.6rem; font-weight: 800; color: var(--teal);">${allAppts.filter(a => a.status === 'Completed').length}</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Completed Visits</div>
+            </div>
+            <div style="background: var(--bg-card-subtle); padding: 1rem; border-radius: var(--radius-md); text-align: center;">
+              <div style="font-size: 1.6rem; font-weight: 800; color: var(--accent);">${patientReviews.length}</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Reviews Submitted</div>
+            </div>
+          `;
+
+          renderActivityTable(allAppts);
+        }
+      } catch (err) {
+        console.error('Error loading profile activity:', err);
+      }
+    });
+
+    function renderActivityTable(appts) {
+      const tbody = document.getElementById('profileActivityTbody');
+      if (!appts || appts.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No activity recorded.</td></tr>`;
+        return;
+      }
+
+      appts.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      tbody.innerHTML = appts.slice(0, 5).map(a => {
+        const docName = a.doctorId?.name || a.doctorName || 'Doctor';
+        const specialty = a.doctorId?.specialty || a.specialty || 'General';
+        const patientName = a.patientId?.name || a.patientName || 'Patient';
+        const displayParty = AuthModule.getCurrentUser()?.role === 'doctor' ? patientName : `${docName} (${specialty})`;
+        const room = a.roomId?.roomNumber || a.roomNumber || 'Room';
+
+        return `
+          <tr>
+            <td><strong>${a.date}</strong></td>
+            <td>${displayParty}</td>
+            <td>${room}</td>
+            <td><span class="status-badge ${a.status}">${a.status}</span></td>
+          </tr>
+        `;
+      }).join('');
+    }
+  </script>
+</body>
+</html>
