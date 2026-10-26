@@ -45,6 +45,7 @@ app.get('/api/health', (req, res) => {
 // Serve frontend static assets
 const frontendPath = path.join(__dirname, '../frontend');
 app.use(express.static(frontendPath));
+app.use(express.static(path.join(frontendPath, 'html')));
 
 // Fallback to frontend index for root
 app.get('/', (req, res) => {
